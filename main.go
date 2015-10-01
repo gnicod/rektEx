@@ -5,7 +5,7 @@ import (
 	"github.com/codegangsta/martini-contrib/binding"
 	"github.com/codegangsta/martini-contrib/render"
 	r "github.com/dancannon/gorethink"
-	"github.com/gnicod/rektEx/backend/api"
+	"github.com/gnicod/rektEx/api"
 	"github.com/go-martini/martini"
 )
 

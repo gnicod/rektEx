@@ -1,4 +1,4 @@
-package api
+package main
 
 import (
 	"fmt"
@@ -38,6 +38,8 @@ func NewLog(log Log, args martini.Params, r render.Render) {
 	key := result.GeneratedKeys[0]
 	fmt.Println(key)
 	fmt.Println(result)
+
+	broadcastMessage(1, []byte(log.Message))
 
 	r.JSON(200, map[string]interface{}{"key": key})
 }

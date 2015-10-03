@@ -1,10 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/codegangsta/martini-contrib/render"
 	rethink "github.com/dancannon/gorethink"
 	"github.com/go-martini/martini"
+	"net/http"
+	"strings"
 )
 
 var session *rethink.Session
@@ -14,6 +17,7 @@ type Log struct {
 	Id      string `gorethink:"id,omitempty"`
 	AppName string `gorethink:"AppName"`
 	Message string `gorethink:"Message"`
+	Ip      string
 }
 
 // TODO sucks, need to use the same session than the one declared in main.go
@@ -30,17 +34,16 @@ func init() {
 }
 
 // TODO separate view from *model*
-func NewLog(log Log, args martini.Params, r render.Render) {
+func NewLog(log Log, req *http.Request, args martini.Params, r render.Render) {
+	ip := strings.Split(req.RemoteAddr, ":")[0]
+	log.Ip = ip
 	result, err := rethink.Table("exceptions").Insert(log).RunWrite(session)
 	if err != nil {
 		fmt.Println(err)
 	}
 	key := result.GeneratedKeys[0]
-	fmt.Println(key)
-	fmt.Println(result)
-
-	broadcastMessage(1, []byte(log.Message))
-
+	b, err := json.Marshal(log)
+	broadcastMessage(1, b)
 	r.JSON(200, map[string]interface{}{"key": key})
 }
 

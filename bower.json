@@ -1,0 +1,22 @@
+{
+	"name": "rektEx",
+	"version": "0.0.1",
+	"description": "",
+	"homepage": "https://github.com/gnicod/rektEx",
+	"authors": [
+		"Gaetan Nicod <nicod.gap@gmail.com>"
+	],
+	"main": "index.html",
+	"ignore": [
+		"**/.*",
+		"node_modules",
+		"bower_components",
+		"test",
+		"tests"
+	],
+	"dependencies": {
+		"rdash-ui": "1.0.*",
+		"bootstrap": "~3.2.0",
+		"font-awesome": "~4.1.0"
+	}
+}

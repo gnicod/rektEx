@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"github.com/go-martini/martini"
 	"github.com/gorilla/websocket"
 	"log"
 	"net"
@@ -39,7 +41,10 @@ func broadcastMessage(messageType int, message []byte) {
 	}
 }
 
-func socketHandler(w http.ResponseWriter, r *http.Request) {
+func socketHandler(args martini.Params, w http.ResponseWriter, r *http.Request) {
+	//When a socket client register to an app, listen to this app and automatically send new update to this client
+	onChange()
+	appname := args["appname"]
 	log.Println(ActiveClients)
 	ws, err := websocket.Upgrade(w, r, nil, 1024, 1024)
 	if _, ok := err.(websocket.HandshakeError); ok {
@@ -52,6 +57,17 @@ func socketHandler(w http.ResponseWriter, r *http.Request) {
 	client := ws.RemoteAddr()
 	sockCli := ClientConn{ws, client}
 	addClient(sockCli)
+
+	logs, _ := GetLogForApp(appname)
+	log.Println(logs)
+	jsonlogs, err := json.Marshal(logs)
+	if err != nil {
+		log.Println(err)
+	}
+
+	if err := sockCli.websocket.WriteMessage(1, jsonlogs); err != nil {
+		return
+	}
 
 	for {
 		log.Println(len(ActiveClients), ActiveClients)

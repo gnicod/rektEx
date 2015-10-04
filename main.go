@@ -20,10 +20,16 @@ func main() {
 	// api group
 	m.Group("/api", func(r martini.Router) {
 		r.Post("/log", binding.Bind(Log{}), NewLog)
-		r.Get("/log/:appname", GetLogForApp)
+		r.Get("/log/:appname", func(args martini.Params, r render.Render) {
+			logs, err := GetLogForApp(args["appname"])
+			if err != nil {
+				r.JSON(200, map[string]interface{}{})
+			}
+			r.JSON(200, logs)
+		})
 	})
 
 	//websocket
-	m.Get("/sock", socketHandler)
+	m.Get("/sock/:appname", socketHandler)
 	m.Run()
 }

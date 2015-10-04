@@ -33,6 +33,26 @@ func init() {
 	}
 }
 
+func onChange() {
+	res, err := rethink.Table("exceptions").Changes().Run(session)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	// Use goroutine to wait for changes. Prints the first 10 results
+	go func() {
+		var response interface{}
+		for res.Next(&response) {
+			fmt.Println("okkkkk")
+		}
+
+		if res.Err() != nil {
+			fmt.Println(res.Err())
+		}
+
+	}()
+}
+
 // TODO separate view from *model*
 func NewLog(log Log, req *http.Request, args martini.Params, r render.Render) {
 	ip := strings.Split(req.RemoteAddr, ":")[0]
@@ -48,24 +68,21 @@ func NewLog(log Log, req *http.Request, args martini.Params, r render.Render) {
 }
 
 // Get all log with appname passed in params
-func GetLogForApp(args martini.Params, r render.Render) {
+func GetLogForApp(appname string) (logs []Log, err error) {
 	rows, err := rethink.Table("exceptions").Filter(map[string]interface{}{
-		"AppName": args["appname"],
-	}).Run(session)
+		"AppName": appname,
+	}).Limit(10).Run(session)
 	if err != nil {
 		fmt.Println(err)
-		r.JSON(200, map[string]interface{}{})
+		return nil, err
 	}
 
-	var logs []Log
 	err2 := rows.All(&logs)
 	if err2 != nil {
-		r.JSON(200, map[string]interface{}{})
-		return
+		return nil, err
 	}
 	if logs == nil {
-		r.JSON(200, map[string]interface{}{})
-		return
+		return nil, err
 	}
-	r.JSON(200, logs)
+	return logs, nil
 }
